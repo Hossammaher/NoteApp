@@ -1,6 +1,5 @@
 package com.example.notes.UI;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -8,13 +7,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notes.Model.Note;
 import com.example.notes.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder> {
@@ -57,6 +56,21 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
 
         return NoteList.get(postion);
     }
+
+    public void onItemMove(int fromPos, int toPos) {
+
+        if (fromPos < toPos) {
+            for (int i = fromPos; i < toPos; i++) {
+                Collections.swap(NoteList, i, i + 1);
+            }
+        } else {
+            for (int i = fromPos; i > toPos; i--) {
+                Collections.swap(NoteList, i, i - 1);
+            }
+        }
+        notifyItemMoved(fromPos, toPos);
+    }
+
 
     public class NoteViewHolder extends RecyclerView.ViewHolder {
 

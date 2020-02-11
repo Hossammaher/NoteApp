@@ -1,16 +1,5 @@
 package com.example.notes.UI;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -25,6 +14,17 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.notes.Model.Note;
 import com.example.notes.R;
@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     FloatingActionButton addNoteFloatingButton, speak;
     SpeechRecognizer mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
     Intent mSpeechRecognizerIntent;
+    int sortCounter = 0; // for sort linear or grid
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         int orientation=getResources().getConfiguration().orientation;
-        noteRecycler =findViewById(R.id.NoteReycler);
+        noteRecycler = findViewById(R.id.NoteRecycler);
         noteAdapter =new NoteAdapter(this);
 
         if (orientation== Configuration.ORIENTATION_PORTRAIT){
@@ -104,6 +105,19 @@ public class MainActivity extends AppCompatActivity {
             case R.id.delete_notes:
                noteViewModel.deleteAll();
                 return true ;
+
+            case R.id.sort:
+
+                if (sortCounter == 0) {
+                    noteRecycler.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                    sortCounter = 1;
+
+                } else if (sortCounter == 1) {
+                    noteRecycler.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+                    sortCounter = 0;
+                }
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -113,9 +127,15 @@ public class MainActivity extends AppCompatActivity {
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback( // delete item with swipe
                 ItemTouchHelper.UP|ItemTouchHelper.DOWN,ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
+
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
+                int from = viewHolder.getAdapterPosition();
+                int to = target.getAdapterPosition();
+
+                noteAdapter.onItemMove(from, to);
+
+                return true;
             }
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
@@ -175,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
         mSpeechRecognizer.setRecognitionListener(new RecognitionListener() {
             @Override
             public void onReadyForSpeech(Bundle bundle) {
-                Toast.makeText(MainActivity.this, "Speak Now", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "Speak Now...", Toast.LENGTH_LONG).show();
 
             }
 
@@ -203,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onError(int i) {
-//                Toast.makeText(MainActivity.this, "Error Speech", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "Error Speech", Toast.LENGTH_LONG).show();
 
             }
 

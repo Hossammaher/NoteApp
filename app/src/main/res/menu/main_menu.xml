@@ -6,4 +6,12 @@
         android:id="@+id/delete_notes"
         android:title="Delete All notes"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/sort"
+        android:icon="@drawable/ic_sort_24dp"
+        android:title="Sort"
+        app:showAsAction="always" />
+
+
 </menu>
